@@ -1,0 +1,16 @@
+{
+  "app": {
+    "description": "Listens for changes to ticket fields and sends them to CTP.",
+    "name": "Buddha Machine"
+  },
+  "loading": "Welcome to this Sample App",
+  "fetch": {
+    "done": "Good",
+    "fail": "failed to fetch information from the server"
+  },
+  "id": "ID",
+  "email": "Email",
+  "name": "Name",
+  "role": "Role",
+  "groups": "Groups"
+}

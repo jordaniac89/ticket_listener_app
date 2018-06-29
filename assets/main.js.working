@@ -1,0 +1,62 @@
+$(function() {
+
+    let client = ZAFClient.init();
+
+    client.invoke('app.hide');
+
+    let currentTicketPhase;
+
+    client.get( CUSTOM_FIELD_MAPPINGS[ "ticketPhase" ] )
+        .then(function(data) {
+          
+          //hide or disable specified fields
+          doHideDisableFields();
+          doListenForPhaseChange(
+            data[[CUSTOM_FIELD_MAPPINGS[ "ticketPhase" ]]]);
+        });
+
+    function doHideDisableFields(){
+      for(let field in MODIFY_FIELDS){
+        client.invoke(
+          'ticketFields:' +  getCustomFieldName(MODIFY_FIELDS[field]['fieldName'])
+          + '.' + getCustomFieldName(MODIFY_FIELDS[field]['modifyAction'])
+        );
+      }
+    }
+
+    function doListenForPhaseChange( ticketPhase ){
+      
+      currentTicketPhase = ticketPhase;
+
+      client.on( 'ticket.save', function() {
+
+         return client.get( CUSTOM_FIELD_MAPPINGS[ "ticketPhase" ] )
+          .then( function( data ) {
+
+            newTicketPhase = data[ CUSTOM_FIELD_MAPPINGS[ "ticketPhase" ] ];
+
+            if( currentTicketPhase !== newTicketPhase ) {
+
+             return client.set( 
+              CUSTOM_FIELD_MAPPINGS[ "ticketPhaseModified" ],
+                new Date().getTime()             
+              )
+              .then(function(data) {
+
+                console.log( "DONE SETTING FIELD VALUE!!!!" )
+
+              })
+              .catch(function(error) {
+                console.log( error.toString() );
+              });
+            }
+          });
+      });
+    }
+
+    function getCustomFieldName(fieldName){
+      //get unique field name from field name
+      //i.e. ticket.custom_field_41706087 -> custom_field_41706087
+      return fieldName.split(".").pop();
+    }
+});
